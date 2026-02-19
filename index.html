@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aditya's Pro To-Do List</title>
+<style>
+/* ===== RESET ===== */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* ===== BODY ===== */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  min-height: 100vh;
+  padding:20px;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===== DARK MODE ===== */
+body.dark { background:#222; color:#eee; }
+body.dark .container { background:#333; }
+body.dark h1 { background:#555; color:#fff; }
+body.dark #taskInput { border:2px solid #555; background:#444; color:#eee; }
+body.dark #addBtn { background:#0b8; }
+body.dark .delete-btn { background:#c33; }
+body.dark .delete-btn:hover { background:#a00; }
+
+/* ===== CONTAINER ===== */
+.container{
+  max-width:600px;
+  margin:auto;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  overflow:hidden;
+  padding-bottom:20px;
+  transition: background 0.3s;
+}
+
+/* ===== HEADER ===== */
+h1{
+  text-align:center;
+  padding:20px;
+  background:#333;
+  color:white;
+}
+
+/* ===== DARK MODE BUTTON ===== */
+#darkModeBtn{
+  margin:10px auto;
+  display:block;
+  padding:8px 20px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  background:#555;
+  color:white;
+}
+
+/* ===== INPUT SECTION ===== */
+.input-section{
+  display:flex;
+  gap:10px;
+  padding:20px;
+}
+#taskInput{
+  flex:1;
+  padding:12px;
+  border:2px solid #ddd;
+  border-radius:5px;
+  font-size:16px;
+  transition:border 0.3s, background 0.3s, color 0.3s;
+}
+#addBtn{
+  padding:12px 20px;
+  background:#4CAF50;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:16px;
+  transition: background 0.3s;
+}
+#addBtn:hover{ background:#45a049; }
+
+/* ===== FILTERS ===== */
+.filters{
+  text-align:center;
+  margin-bottom:10px;
+}
+.filters button{
+  margin:5px;
+  padding:6px 12px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  background:#ddd;
+  transition: background 0.3s;
+}
+.filters button.active{ background:#4CAF50; color:white; }
+
+/* ===== TASK LIST ===== */
+#taskList{ list-style:none; }
+
+.task-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:15px 20px;
+  border-bottom:1px solid #eee;
+  transition:all 0.3s, opacity 0.5s;
+  opacity:0;
+}
+.task-item.show{ opacity:1; }
+.task-item.completed{ opacity:0.6; text-decoration:line-through; }
+.task-item:hover{ background:#f8f9fa; }
+
+.delete-btn{
+  background:#f44336;
+  color:white;
+  border:none;
+  padding:5px 10px;
+  border-radius:3px;
+  cursor:pointer;
+  margin-left:auto;
+  transition: background 0.3s;
+}
+.delete-btn:hover{ background:#da190b; }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:550px){
+  .task-item{ flex-direction:column; align-items:flex-start; }
+  #addBtn{ padding:12px 10px; }
+}
+
+/* ===== DRAGGING ===== */
+.task-item.dragging{
+  opacity:0.5;
+  border:2px dashed #999;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Pro To-Do List</h1>
+
+  <button id="darkModeBtn">Toggle Dark Mode</button>
+
+  <div class="input-section">
+    <input id="taskInput" placeholder="Enter a task...">
+    <button id="addBtn">Add Task</button>
+  </div>
+
+  <div class="filters">
+    <button data-filter="all" class="active">All</button>
+    <button data-filter="active">Active</button>
+    <button data-filter="completed">Completed</button>
+  </div>
+
+  <ul id="taskList"></ul>
+</div>
+
+<script>
+// ===== DOM ELEMENTS =====
+const taskInput = document.getElementById('taskInput');
+const addBtn = document.getElementById('addBtn');
+const taskList = document.getElementById('taskList');
+const darkModeBtn = document.getElementById('darkModeBtn');
+const filterButtons = document.querySelectorAll('.filters button');
+
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let currentFilter = 'all';
+
+// ===== DARK MODE =====
+if(localStorage.getItem('darkMode')==='true') document.body.classList.add('dark');
+darkModeBtn.addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+  localStorage.setItem('darkMode',document.body.classList.contains('dark'));
+});
+
+// ===== RENDER TASKS =====
+function renderTasks(){
+  taskList.innerHTML='';
+  tasks.forEach((task,index)=>{
+    if(currentFilter==='active' && task.completed) return;
+    if(currentFilter==='completed' && !task.completed) return;
+
+    const li = document.createElement('li');
+    li.className = 'task-item';
+    li.draggable = true;
+    li.innerHTML = `
+      <input type="checkbox" ${task.completed?'checked':''} onchange="toggleTask(${index})">
+      <span ondblclick="editTask(${index}, this)">${task.text}</span>
+      <button class="delete-btn" onclick="deleteTask(${index})">Delete</button>
+    `;
+    taskList.appendChild(li);
+
+    setTimeout(()=> li.classList.add('show'),10);
+
+    // Drag & Drop
+    li.addEventListener('dragstart',()=> li.classList.add('dragging'));
+    li.addEventListener('dragend',()=> li.classList.remove('dragging'));
+  });
+  localStorage.setItem('tasks',JSON.stringify(tasks));
+}
+
+// ===== ADD TASK =====
+addBtn.addEventListener('click',()=>{
+  const text = taskInput.value.trim();
+  if(text){
+    tasks.push({text,completed:false});
+    taskInput.value='';
+    renderTasks();
+  }
+});
+taskInput.addEventListener('keypress',(e)=>{ if(e.key==='Enter') addBtn.click(); });
+
+// ===== TOGGLE COMPLETE =====
+function toggleTask(index){
+  tasks[index].completed=!tasks[index].completed;
+  renderTasks();
+}
+
+// ===== DELETE TASK =====
+function deleteTask(index){
+  tasks.splice(index,1);
+  renderTasks();
+}
+
+// ===== EDIT TASK INLINE =====
+function editTask(index){
+  const newText = prompt("Edit your task:", tasks[index].text);
+  if(newText!==null && newText.trim()!==''){
+    tasks[index].text = newText.trim();
+    renderTasks();
+  }
+}
+
+// ===== FILTER BUTTONS =====
+filterButtons.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    filterButtons.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderTasks();
+  });
+});
+
+// ===== DRAG & DROP REORDER =====
+taskList.addEventListener('dragover',(e)=>{
+  e.preventDefault();
+  const dragging = document.querySelector('.dragging');
+  const afterElement = getDragAfterElement(taskList,e.clientY);
+  if(afterElement==null) taskList.appendChild(dragging);
+  else taskList.insertBefore(dragging,afterElement);
+
+  // Update tasks array according to new order
+  const newTasks=[];
+  taskList.querySelectorAll('.task-item').forEach(li=>{
+    const span = li.querySelector('span');
+    const task = tasks.find(t=>t.text===span.textContent || t.text===span.innerText);
+    newTasks.push(task);
+  });
+  tasks=newTasks;
+  localStorage.setItem('tasks',JSON.stringify(tasks));
+});
+
+function getDragAfterElement(container,y){
+  const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging)')];
+  return draggableElements.reduce((closest,child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = y-(box.top+box.height/2);
+    if(offset<0 && offset>closest.offset) return {offset:offset,element:child};
+    else return closest;
+  },{offset:Number.NEGATIVE_INFINITY}).element;
+}
+
+// ===== INITIAL RENDER =====
+renderTasks();
+</script>
+</body>
+</html>
