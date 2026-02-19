@@ -1,0 +1,243 @@
+/* ============================= */
+/* RESET */
+/* ============================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================= */
+/* BODY */
+/* ============================= */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ============================= */
+/* DARK MODE */
+/* ============================= */
+body.dark {
+  background: #121212;
+  color: #f1f1f1;
+}
+
+body.dark .container {
+  background: #1e1e1e;
+}
+
+body.dark h1 {
+  background: #2c2c2c;
+}
+
+body.dark #taskInput {
+  background: #2a2a2a;
+  border: 2px solid #444;
+  color: #f1f1f1;
+}
+
+body.dark .task-item {
+  border-bottom: 1px solid #333;
+}
+
+body.dark .filters button {
+  background: #333;
+  color: #f1f1f1;
+}
+
+/* ============================= */
+/* CONTAINER */
+/* ============================= */
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  padding-bottom: 20px;
+  transition: background 0.3s ease;
+}
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+h1 {
+  text-align: center;
+  padding: 25px;
+  background: #222;
+  color: #fff;
+  font-size: 26px;
+  letter-spacing: 1px;
+}
+
+/* ============================= */
+/* DARK MODE BUTTON */
+/* ============================= */
+#darkModeBtn {
+  display: block;
+  margin: 15px auto;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 20px;
+  background: #444;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#darkModeBtn:hover {
+  background: #000;
+}
+
+/* ============================= */
+/* INPUT SECTION */
+/* ============================= */
+.input-section {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+}
+
+#taskInput {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border 0.3s ease;
+}
+
+#taskInput:focus {
+  outline: none;
+  border: 2px solid #667eea;
+}
+
+#addBtn {
+  padding: 12px 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+#addBtn:hover {
+  background: #45a049;
+  transform: scale(1.05);
+}
+
+/* ============================= */
+/* FILTER BUTTONS */
+/* ============================= */
+.filters {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.filters button {
+  margin: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background: #e0e0e0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.filters button:hover {
+  background: #cfcfcf;
+}
+
+.filters button.active {
+  background: #4CAF50;
+  color: white;
+}
+
+/* ============================= */
+/* TASK LIST */
+/* ============================= */
+#taskList {
+  list-style: none;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.task-item.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.task-item:hover {
+  background: #f8f9fa;
+}
+
+.task-item.completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+/* ============================= */
+/* DELETE BUTTON */
+/* ============================= */
+.delete-btn {
+  margin-left: auto;
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  background: #d32f2f;
+  transform: scale(1.05);
+}
+
+/* ============================= */
+/* DRAG & DROP */
+/* ============================= */
+.task-item.dragging {
+  opacity: 0.5;
+  border: 2px dashed #999;
+}
+
+/* ============================= */
+/* RESPONSIVE */
+/* ============================= */
+@media (max-width: 550px) {
+  .input-section {
+    flex-direction: column;
+  }
+
+  #addBtn {
+    width: 100%;
+  }
+
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .delete-btn {
+    margin-left: 0;
+  }
+}
